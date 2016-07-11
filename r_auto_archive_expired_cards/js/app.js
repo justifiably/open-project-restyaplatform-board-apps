@@ -4,6 +4,7 @@
     var session_storage_apps = JSON.parse(sessionStorage.getItem("apps"));
     $dc.ready(function() {
         var custom_fields_data = '';
+        var is_archive_call = 0;
         $.getJSON("apps/r_auto_archive_expired_cards/json/app.json", function(data) {
             custom_fields_data = Backbone.form(data);
         });
@@ -21,7 +22,8 @@
                                         auto_archive_date = new Date();
                                         auto_archive_date.setDate(auto_archive_date.getDate() - parseInt(customFieldArr.auto_archive_days));
                                         card_modified_date = new Date(card.modified);
-                                        if ((auto_archive_date.getTime() >= card_modified_date.getTime()) && (card.is_archived === 0)) {
+                                        if ((auto_archive_date.getTime() >= card_modified_date.getTime()) && (card.is_archived === 0) && is_archive_call === 0) {
+                                            is_archive_call = 1;
                                             $.ajax({
                                                 url: api_url + 'boards/' + board_response.id + '/lists/' + list.id + '/cards/' + card.id + '.json?token=' + getToken(),
                                                 type: 'put',
@@ -30,7 +32,9 @@
                                                 }),
                                                 contentType: 'application/json; charset=utf-8',
                                                 dataType: 'json',
-                                                success: function(response) {}
+                                                success: function(response) {
+                                                    is_archive_call = 0;
+                                                }
                                             });
                                         }
                                     });
